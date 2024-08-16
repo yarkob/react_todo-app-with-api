@@ -1,40 +1,30 @@
 import React, {
   ChangeEvent,
-  Dispatch,
   FormEvent,
-  SetStateAction,
   KeyboardEvent,
   useState,
+  useContext,
 } from 'react';
 import cs from 'classnames';
 import { Todo } from '../types/Todo';
 import { client } from '../utils/fetchClient';
 import { Error } from '../App';
 import { updateTodo } from '../api/todos';
+import { TodosContext } from '../utils/ContextProvider';
 
 interface Props {
   title: string;
   todo: Todo;
-  todos: Todo[];
-  setTodos: Dispatch<SetStateAction<Todo[]>>;
-  setError: Dispatch<SetStateAction<Error | null>>;
-  setProcessingTodos: Dispatch<SetStateAction<Todo['id'][]>>;
-  processingTodos: Todo['id'][];
-  isToggled: boolean;
-  setIsToggled: Dispatch<SetStateAction<boolean>>;
   onFocusHandlerInput: VoidFunction;
 }
 
 export const TodoItem: React.FC<Props> = ({
   title,
   todo,
-  setTodos,
-  setError,
-  setProcessingTodos,
-  processingTodos,
-  isToggled,
   onFocusHandlerInput,
 }) => {
+  const { setTodos, setError, setProcessingTodos, processingTodos, isToggled } =
+    useContext(TodosContext);
   const [isEditing, setIsEditing] = useState(false);
   const [updatedTitle, setUpdatedTitle] = useState(todo.title);
 

@@ -1,30 +1,25 @@
-import React, { Dispatch, SetStateAction } from 'react';
+import React, { Dispatch, SetStateAction, useContext } from 'react';
 import { FilterType } from '../types/FilterType';
-import { Todo } from '../types/Todo';
 import cs from 'classnames';
 import { filterTodos } from '../utils/filterTodos';
 import { client } from '../utils/fetchClient';
 import { Error } from '../App';
+import { TodosContext } from '../utils/ContextProvider';
 
 interface Props {
   setFilterBy: Dispatch<SetStateAction<FilterType>>;
   filterBy: FilterType;
-  todos: Todo[];
-  setTodos: Dispatch<SetStateAction<Todo[]>>;
-  setError: Dispatch<SetStateAction<Error | null>>;
-  setProcessingTodos: Dispatch<SetStateAction<Todo['id'][]>>;
   onFocusHeaderInput: VoidFunction;
 }
 
 export const Footer: React.FC<Props> = ({
   setFilterBy,
   filterBy,
-  todos,
-  setTodos,
-  setError,
-  setProcessingTodos,
   onFocusHeaderInput,
 }) => {
+  const { todos, setTodos, setError, setProcessingTodos } =
+    useContext(TodosContext);
+
   const clearCompletedHandler = () => {
     filterTodos(FilterType.Completed, todos).forEach(todo => {
       setProcessingTodos(prevProcessingTodos => [
