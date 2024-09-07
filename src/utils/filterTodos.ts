@@ -1,5 +1,5 @@
 import { FilterType } from '../types/FilterType';
-import { Todo } from '../types/Todo';
+import { Todo } from '../types';
 
 export const filterTodos = (todoState: FilterType, todos: Todo[]) => {
   if (todoState === FilterType.Active) {

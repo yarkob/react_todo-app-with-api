@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Todo } from '../types';
+
 const BASE_URL = 'https://mate.academy/students-api';
 
 // returns a promise resolved after a given delay
@@ -26,7 +28,7 @@ function request<T>(
     };
   }
 
-  // DON'T change the delay it is required for tests
+  // we wait for testing purpose to see loaders
   return wait(100)
     .then(() => fetch(BASE_URL + url, options))
     .then(response => {
@@ -38,9 +40,10 @@ function request<T>(
     });
 }
 
-export const client = {
+export default {
   get: <T>(url: string) => request<T>(url),
-  post: <T>(url: string, data: any) => request<T>(url, 'POST', data),
+  post: <T>(url: string, data: Omit<Todo, 'id'>) =>
+    request<T>(url, 'POST', data),
   patch: <T>(url: string, data: any) => request<T>(url, 'PATCH', data),
   delete: (url: string) => request(url, 'DELETE'),
 };

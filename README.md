@@ -1,6 +1,6 @@
-# React Todo App with API (complete)
+# React Index App with API (complete)
 
-It is the third part of the React Todo App with API.
+It is the third part of the React Index App with API.
 
 Take your code implemented for [Add and Delete](https://github.com/mate-academy/react_todo-app-add-and-delete)
 and implement the ability to toggle and rename todos.
