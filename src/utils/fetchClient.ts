@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Todo } from '../types';
+import { User } from '../types/User';
 
 const BASE_URL = 'https://mate.academy/students-api';
 
@@ -42,7 +43,7 @@ function request<T>(
 
 export default {
   get: <T>(url: string) => request<T>(url),
-  post: <T>(url: string, data: Omit<Todo, 'id'>) =>
+  post: <T>(url: string, data: Omit<Todo | User, 'id'>) =>
     request<T>(url, 'POST', data),
   patch: <T>(url: string, data: any) => request<T>(url, 'PATCH', data),
   delete: (url: string) => request(url, 'DELETE'),

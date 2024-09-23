@@ -11,6 +11,7 @@ import { TempTodo, Todo } from '../types';
 import { FilterStatus, TodosError } from '../constants';
 import { noop } from '../utils';
 import { addTodo, deleteTodo, updateTodo, USER_ID } from '../api/todos';
+import { User } from '../types/User';
 
 export interface ITodosContext {
   todos: Todo[];
@@ -30,6 +31,8 @@ export interface ITodosContext {
     updateState?: VoidFunction,
   ) => VoidFunction;
   handleUpdateTodo: (todo: Todo, updateState?: VoidFunction) => VoidFunction;
+  createNewUser: (newEmail: string, newName: string) => void;
+  user: User | null;
 }
 export const TodosContext = createContext<ITodosContext>({
   todos: [],
@@ -43,6 +46,8 @@ export const TodosContext = createContext<ITodosContext>({
   handleAddTodo: noop,
   handleDeleteTodo: () => noop,
   handleUpdateTodo: () => noop,
+  createNewUser: () => noop,
+  user: null,
 });
 
 interface Props {
@@ -55,6 +60,7 @@ const TodosContextProvider: FC<Props> = ({ children }) => {
   const [todosInProcess, setTodosInProcess] = useState<number[]>([]);
   const [filter, setFilter] = useState<FilterStatus>(FilterStatus.ALL);
   const [errorMessage, setErrorMessage] = useState<TodosError>(TodosError.NONE);
+  const [user, setUser] = useState<User | null>(!!localStorage && null);
 
   const handleErrorMessage = useCallback(
     (message: TodosError) => () => {
@@ -112,7 +118,7 @@ const TodosContextProvider: FC<Props> = ({ children }) => {
           );
         });
     },
-    [],
+    [handleErrorMessage],
   );
 
   const handleAddTodo = useCallback(
@@ -142,7 +148,26 @@ const TodosContextProvider: FC<Props> = ({ children }) => {
           setTempTodo(null);
         });
     },
-    [],
+    [handleErrorMessage],
+  );
+
+  const createNewUser = useCallback(
+    (newEmail: string, newName: string) => {
+      const userData = {
+        id: Math.random(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        name: newName,
+        username: null,
+        email: newEmail,
+        phone: null,
+        website: null,
+      };
+
+      localStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData);
+    },
+    [user],
   );
 
   return (
@@ -159,6 +184,8 @@ const TodosContextProvider: FC<Props> = ({ children }) => {
         handleAddTodo,
         handleDeleteTodo,
         handleUpdateTodo,
+        createNewUser,
+        user,
       }}
     >
       {children}

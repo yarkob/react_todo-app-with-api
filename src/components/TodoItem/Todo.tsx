@@ -80,6 +80,7 @@ const TodoItem: FC<Props> = ({ todo }) => {
   return (
     <div data-cy="Todo" className={cn('todo', { completed })}>
       <label className="todo__status-label">
+        {/* comment */}
         <input
           data-cy="TodoStatus"
           type="checkbox"
