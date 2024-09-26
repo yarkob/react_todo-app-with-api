@@ -6,13 +6,17 @@ import { getTodos } from './api/todos';
 import useTodosContext from './contexts/useTodosContext';
 
 export const TodoApp: React.FC = () => {
-  const { todos, handleErrorMessage, setTodos } = useTodosContext();
+  const { todos, handleErrorMessage, setTodos, user } = useTodosContext();
 
   useEffect(() => {
-    getTodos()
+    if (!user) {
+      return;
+    }
+
+    getTodos(user.id)
       .then(loadedTodos => setTodos(loadedTodos))
       .catch(handleErrorMessage(TodosError.LOAD_TODOS));
-  }, [handleErrorMessage, setTodos]);
+  }, [handleErrorMessage, setTodos, user]);
 
   return (
     <div className="todoapp">
