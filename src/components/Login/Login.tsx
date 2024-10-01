@@ -31,7 +31,7 @@ const Login = () => {
   };
 
   return (
-    <form onSubmit={submitHandler}>
+    <form className="box mt-5" onSubmit={submitHandler}>
       <h1 className="title is-3">Log in to open todos</h1>
       <div className="field">
         <label htmlFor="user-email" className="label">
@@ -47,39 +47,40 @@ const Login = () => {
             required={true}
             value={form.email}
             onChange={onChange}
+            disabled={shouldCreateNewUser}
           />
           <span className="icon is-small is-left">
             <i className="fas fa-envelope"></i>
           </span>
         </div>
+      </div>
 
-        {shouldCreateNewUser && (
-          <div className="field">
-            <label className="label" htmlFor="user-name">
-              Your Name
-            </label>
-            <div className="control has-icons-left">
-              <input
-                type="text"
-                id="user-name"
-                className="input"
-                name="name"
-                placeholder="Enter your name"
-                required={true}
-                value={form.name}
-                onChange={onChange}
-              />
-              <span className="icon is-small is-left">
-                <i className="fas fa-user"></i>
-              </span>
-            </div>
-          </div>
-        )}
+      {shouldCreateNewUser && (
         <div className="field">
-          <button type="submit" className="button is-primary">
-            Register
-          </button>
+          <label className="label" htmlFor="user-name">
+            Your Name
+          </label>
+          <div className="control has-icons-left">
+            <input
+              type="text"
+              id="user-name"
+              className="input"
+              name="name"
+              placeholder="Enter your name"
+              required={true}
+              value={form.name}
+              onChange={onChange}
+            />
+            <span className="icon is-small is-left">
+              <i className="fas fa-user"></i>
+            </span>
+          </div>
         </div>
+      )}
+      <div className="field">
+        <button type="submit" className="button is-primary">
+          {shouldCreateNewUser ? 'Register' : 'Login'}
+        </button>
       </div>
     </form>
   );
