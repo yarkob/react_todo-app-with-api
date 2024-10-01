@@ -38,14 +38,17 @@ const page = {
   mockLoad: (response = { fixture: 'todos' }) => {
     return cy.intercept('**/todos?userId=*', response);
   },
-  mockCreate: (response) => {
+  mockCreate: response => {
     const options = { method: 'POST', url: '**/todos' };
 
-    const spy = cy.stub()
-      .callsFake(req => req.reply({
-        statusCode: 201,
-        body: { ...req.body, id: Math.random() },
-      }))
+    const spy = cy
+      .stub()
+      .callsFake(req =>
+        req.reply({
+          statusCode: 201,
+          body: { ...req.body, id: Math.random() },
+        }),
+      )
       .as('createCallback');
 
     return cy.intercept(options, response || spy);
@@ -59,7 +62,8 @@ const page = {
     const todo = mixedTodos.find(todo => todo.id === id) || {};
     const options = { method: 'PATCH', url: `**/todos/${id}` };
 
-    const spy = cy.stub()
+    const spy = cy
+      .stub()
       .callsFake(req => req.reply({ body: { ...todo, ...req.body, id } }))
       .as('updateCallback');
 
@@ -76,10 +80,16 @@ const todos = {
 
   assertCount: length => cy.byDataCy('Todo').should('have.length', length),
   assertTitle: (index, title) => todos.title(index).should('have.text', title),
-  assertLoading: index => todos.el(index).byDataCy('TodoLoader').should('have.class', 'is-active'),
-  assertNotLoading: index => todos.el(index).byDataCy('TodoLoader').should('not.have.class', 'is-active'),
+  assertLoading: index =>
+    todos.el(index).byDataCy('TodoLoader').should('have.class', 'is-active'),
+  assertNotLoading: index =>
+    todos
+      .el(index)
+      .byDataCy('TodoLoader')
+      .should('not.have.class', 'is-active'),
   assertCompleted: index => todos.el(index).should('have.class', 'completed'),
-  assertNotCompleted: index => todos.el(index).should('not.have.class', 'completed'),
+  assertNotCompleted: index =>
+    todos.el(index).should('not.have.class', 'completed'),
 };
 
 const errorMessage = {
@@ -102,13 +112,14 @@ const filter = {
   assertVisible: () => filter.el().should('exist'),
   assertHidden: () => filter.el().should('not.exist'),
   assertSelected: type => filter.link(type).should('have.class', 'selected'),
-  assertNotSelected: type => filter.link(type).should('not.have.class', 'selected'),
+  assertNotSelected: type =>
+    filter.link(type).should('not.have.class', 'selected'),
 };
 //#endregion
 
 let failed = false;
 
-Cypress.on('fail', (e) => {
+Cypress.on('fail', e => {
   failed = true;
   throw e;
 });
@@ -120,9 +131,10 @@ describe('', () => {
 
   describe('Page with no todos', () => {
     it('should send 1 todos request', () => {
-      const spy = cy.stub()
+      const spy = cy
+        .stub()
         .callsFake(req => req.reply({ body: [] }))
-        .as('loadCallback')
+        .as('loadCallback');
 
       page.mockLoad(spy).as('loadRequest');
       page.visit();
@@ -221,7 +233,7 @@ describe('', () => {
       todos.assertNotLoading(2);
       todos.assertNotLoading(3);
       todos.assertNotLoading(4);
-    })
+    });
 
     it('should have correct todo titles', () => {
       todos.assertTitle(0, 'HTML');
@@ -467,7 +479,7 @@ describe('', () => {
       beforeEach(() => {
         page.mockCreate();
         page.pauseTimers();
-        page.newTodoField().type('Test Todo{enter}');
+        page.newTodoField().type('Test Index{enter}');
       });
 
       it('should send a create request', () => {
@@ -480,7 +492,7 @@ describe('', () => {
       });
 
       it('should keep entered text', () => {
-        page.newTodoField().should('have.value', 'Test Todo');
+        page.newTodoField().should('have.value', 'Test Index');
       });
 
       it('should create and show a temp TodoItem with Loader', () => {
@@ -489,7 +501,7 @@ describe('', () => {
       });
 
       it('should show a temp TodoItem with correct title', () => {
-        todos.assertTitle(5, 'Test Todo');
+        todos.assertTitle(5, 'Test Index');
       });
 
       it('should show a not completed temp TodoItem', () => {
@@ -513,7 +525,7 @@ describe('', () => {
       describe('', () => {
         beforeEach(() => {
           page.mockCreate().as('createRequest');
-          page.newTodoField().type('Test Todo{enter}');
+          page.newTodoField().type('Test Index{enter}');
 
           cy.wait('@createRequest');
         });
@@ -526,7 +538,7 @@ describe('', () => {
         });
 
         it('should add a todo with a correct title', () => {
-          todos.assertTitle(5, 'Test Todo');
+          todos.assertTitle(5, 'Test Index');
         });
 
         it('should add a not completed todo', () => {
@@ -584,7 +596,7 @@ describe('', () => {
         page.mockCreate().as('createRequest');
 
         filter.link('active').click();
-        page.newTodoField().type('Test Todo{enter}');
+        page.newTodoField().type('Test Index{enter}');
         cy.wait('@createRequest');
 
         filter.assertSelected('active');
@@ -596,10 +608,11 @@ describe('', () => {
         // to prevent Cypress from failing the test on uncaught exception
         cy.once('uncaught:exception', () => false);
 
-        page.mockCreate({ statusCode: 503, body: 'Service Unavailable' })
+        page
+          .mockCreate({ statusCode: 503, body: 'Service Unavailable' })
           .as('createRequest');
 
-        page.newTodoField().type('Test Todo{enter}');
+        page.newTodoField().type('Test Index{enter}');
 
         cy.wait('@createRequest');
       });
@@ -632,7 +645,7 @@ describe('', () => {
       });
 
       it('should keep the entered text on request fail', () => {
-        page.newTodoField().should('have.value', 'Test Todo');
+        page.newTodoField().should('have.value', 'Test Index');
       });
 
       it('should focus text field', () => {
@@ -652,7 +665,8 @@ describe('', () => {
         // to prevent Cypress from failing the test on uncaught exception
         cy.once('uncaught:exception', () => false);
 
-        page.mockCreate({ statusCode: 503, body: 'Service Unavailable' })
+        page
+          .mockCreate({ statusCode: 503, body: 'Service Unavailable' })
           .as('createRequest2');
 
         page.newTodoField().type(`{enter}`);
@@ -665,7 +679,8 @@ describe('', () => {
         // to prevent Cypress from failing the test on uncaught exception
         cy.once('uncaught:exception', () => false);
 
-        page.mockCreate({ statusCode: 503, body: 'Service Unavailable' })
+        page
+          .mockCreate({ statusCode: 503, body: 'Service Unavailable' })
           .as('createRequest2');
 
         cy.clock();
@@ -689,7 +704,7 @@ describe('', () => {
         todos.assertCount(6);
         // todos.assertNotLoading(5);
         todos.assertNotCompleted(5);
-        todos.assertTitle(5, 'Test Todo');
+        todos.assertTitle(5, 'Test Index');
 
         page.todosCounter().should('have.text', '3 items left');
       });
@@ -723,7 +738,7 @@ describe('', () => {
     });
   });
 
-  describe('Individual Todo Deletion', () => {
+  describe('Individual Index Deletion', () => {
     describe('Default behavior', () => {
       beforeEach(() => {
         page.mockLoad().as('loadRequest');
@@ -770,7 +785,12 @@ describe('', () => {
         // to prevent Cypress from failing the test on uncaught exception
         cy.once('uncaught:exception', () => false);
 
-        page.mockDelete(257334, { statusCode: 500, body: 'Internal Server Error' }).as('deleteRequest');
+        page
+          .mockDelete(257334, {
+            statusCode: 500,
+            body: 'Internal Server Error',
+          })
+          .as('deleteRequest');
 
         todos.deleteButton(0).click();
         cy.wait('@deleteRequest');
@@ -783,7 +803,12 @@ describe('', () => {
         // to prevent Cypress from failing the test on uncaught exception
         cy.once('uncaught:exception', () => false);
 
-        page.mockDelete(257334, { statusCode: 500, body: 'Internal Server Error' }).as('deleteRequest');
+        page
+          .mockDelete(257334, {
+            statusCode: 500,
+            body: 'Internal Server Error',
+          })
+          .as('deleteRequest');
 
         todos.deleteButton(0).click();
         cy.wait('@deleteRequest');
@@ -804,7 +829,11 @@ describe('', () => {
         // to prevent Cypress from failing the test on uncaught exception
         cy.once('uncaught:exception', () => false);
 
-        page.mockDelete(257338, { statusCode: 500, body: 'Internal Server Error' })
+        page
+          .mockDelete(257338, {
+            statusCode: 500,
+            body: 'Internal Server Error',
+          })
           .as('deleteRequest');
 
         todos.deleteButton(4).click();
@@ -817,12 +846,12 @@ describe('', () => {
     describe('Last todo deletion', () => {
       beforeEach(() => {
         const todo = {
-          "id": 257334,
-          "createdAt": "2023-09-19T08:21:56.486Z",
-          "updatedAt": "2023-09-19T08:23:07.096Z",
-          "userId": 1,
-          "title": "HTML",
-          "completed": false
+          id: 257334,
+          createdAt: '2023-09-19T08:21:56.486Z',
+          updatedAt: '2023-09-19T08:23:07.096Z',
+          userId: 1,
+          title: 'HTML',
+          completed: false,
         };
 
         page.mockLoad({ body: [todo] }).as('loadRequest');
@@ -849,7 +878,7 @@ describe('', () => {
     });
   });
 
-  describe('Group Todo Deletion', () => {
+  describe('Group Index Deletion', () => {
     describe('with no completed todos', () => {
       beforeEach(() => {
         page.mockLoad({ fixture: 'active-todos' }).as('loadRequest');
@@ -919,7 +948,12 @@ describe('', () => {
           cy.once('uncaught:exception', () => false);
 
           page.mockDelete(257334).as('deleteRequest1');
-          page.mockDelete(257335, { statusCode: 500, body: 'Internal Server Error' }).as('deleteRequest2');
+          page
+            .mockDelete(257335, {
+              statusCode: 500,
+              body: 'Internal Server Error',
+            })
+            .as('deleteRequest2');
           page.mockDelete(257336).as('deleteRequest3');
 
           page.clearCompletedButton().click();
@@ -979,7 +1013,7 @@ describe('', () => {
     });
   });
 
-  describe('Todo Toggling', () => {
+  describe('Index Toggling', () => {
     beforeEach(() => {
       page.mockLoad().as('loadRequest');
       page.visit();
@@ -1053,7 +1087,8 @@ describe('', () => {
         // to prevent Cypress from failing the test on uncaught exception
         cy.once('uncaught:exception', () => false);
 
-        page.mockUpdate(257334, { statusCode: 503, body: 'Service Unavailable' })
+        page
+          .mockUpdate(257334, { statusCode: 503, body: 'Service Unavailable' })
           .as('updateRequest');
 
         todos.statusToggler(0).click();
@@ -1119,7 +1154,8 @@ describe('', () => {
         // to prevent Cypress from failing the test on uncaught exception
         cy.once('uncaught:exception', () => false);
 
-        page.mockUpdate(257334, { statusCode: 503, body: 'Service Unavailable' })
+        page
+          .mockUpdate(257334, { statusCode: 503, body: 'Service Unavailable' })
           .as('updateRequest');
 
         todos.statusToggler(0).click();
@@ -1166,12 +1202,12 @@ describe('', () => {
 
       it('should disappear after removing the last todo', () => {
         const todo = {
-          "id": 257334,
-          "createdAt": "2023-09-19T08:21:56.486Z",
-          "updatedAt": "2023-09-19T08:23:07.096Z",
-          "userId": 1,
-          "title": "HTML",
-          "completed": false
+          id: 257334,
+          createdAt: '2023-09-19T08:21:56.486Z',
+          updatedAt: '2023-09-19T08:23:07.096Z',
+          userId: 1,
+          title: 'HTML',
+          completed: false,
         };
 
         page.mockLoad({ body: [todo] }).as('loadRequest');
@@ -1448,7 +1484,8 @@ describe('', () => {
         });
 
         it('should not send a request on change', () => {
-          const spy = cy.stub()
+          const spy = cy
+            .stub()
             .callsFake(req => req.reply({ body: { ...req.body, id: 257334 } }))
             .as('renameCallback');
 
@@ -1477,7 +1514,8 @@ describe('', () => {
         });
 
         it('should not send a request', () => {
-          const spy = cy.stub()
+          const spy = cy
+            .stub()
             .callsFake(req => req.reply({ body: { ...req.body, id: 257334 } }))
             .as('renameCallback');
 
@@ -1492,7 +1530,8 @@ describe('', () => {
 
       describe('on enter before recieved a response', () => {
         it('should send a request', () => {
-          const spy = cy.stub()
+          const spy = cy
+            .stub()
             .callsFake(req => req.reply({ body: { ...req.body, id: 257334 } }))
             .as('renameCallback');
 
@@ -1531,7 +1570,7 @@ describe('', () => {
           page.mockUpdate(257334).as('renameRequest');
 
           todos.title(0).trigger('dblclick');
-          todos.titleField(0).clear()
+          todos.titleField(0).clear();
         });
 
         it('should cancel loading', () => {
@@ -1602,7 +1641,8 @@ describe('', () => {
 
       describe('if title was not changed', () => {
         it('should not send a request on enter', () => {
-          const spy = cy.stub()
+          const spy = cy
+            .stub()
             .callsFake(req => req.reply({ body: { ...req.body, id: 257334 } }))
             .as('renameCallback');
 
@@ -1638,7 +1678,8 @@ describe('', () => {
 
       describe('if title became empty', () => {
         beforeEach(() => {
-          const spy = cy.stub()
+          const spy = cy
+            .stub()
             .callsFake(req => req.reply({ body: { ...req.body, id: 257334 } }))
             .as('renameCallback');
 
@@ -1690,7 +1731,7 @@ describe('', () => {
           cy.wait('@deleteRequest');
 
           errorMessage.assertVisible();
-          errorMessage.assertText('Unable to delete a todo')
+          errorMessage.assertText('Unable to delete a todo');
         });
 
         // this test may be unstable
@@ -1737,7 +1778,7 @@ describe('', () => {
           page.mockUpdate(257334).as('renameRequest');
 
           todos.title(0).trigger('dblclick');
-          todos.titleField(0).clear()
+          todos.titleField(0).clear();
           todos.titleField(0).type('New title');
           todos.titleField(0).blur();
           cy.wait('@renameRequest');
@@ -1749,7 +1790,8 @@ describe('', () => {
         });
 
         it('should cancel if title was not changed', () => {
-          const spy = cy.stub()
+          const spy = cy
+            .stub()
             .callsFake(req => req.reply({ body: { ...req.body, id: 257334 } }))
             .as('renameCallback');
 
@@ -1774,7 +1816,7 @@ describe('', () => {
 
           todos.assertCount(4);
           todos.assertTitle(0, 'CSS');
-        })
+        });
       });
     });
   });
